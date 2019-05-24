@@ -17,7 +17,7 @@
 
 #![deny(bare_trait_objects)]
 #![deny(missing_docs)]
-#![deny(unused)]
+//#![deny(unused)]
 #![cfg_attr(feature = "nightly", feature(test))]
 
 pub mod extractors;

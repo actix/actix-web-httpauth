@@ -89,7 +89,7 @@ where
 {
     /// Construct `HttpAuthentication` middleware for the HTTP "Bearer"
     /// authentication scheme.
-    /// 
+    ///
     /// ## Example
     ///
     /// ```rust
