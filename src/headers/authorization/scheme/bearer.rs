@@ -23,7 +23,7 @@ impl Bearer {
     ///
     /// ## Example
     ///
-    /// ```rust
+    /// ```
     /// # use actix_web_httpauth::headers::authorization::Bearer;
     /// let credentials = Bearer::new("mF_9.B5f-4.1JqM");
     /// ```

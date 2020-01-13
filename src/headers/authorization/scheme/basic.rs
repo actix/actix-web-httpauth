@@ -24,7 +24,7 @@ impl Basic {
     ///
     /// ## Example
     ///
-    /// ```rust
+    /// ```
     /// # use actix_web_httpauth::headers::authorization::Basic;
     /// let credentials = Basic::new("Alladin", Some("open sesame"));
     /// ```

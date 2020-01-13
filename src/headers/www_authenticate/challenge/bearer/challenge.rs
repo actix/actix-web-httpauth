@@ -16,7 +16,7 @@ use crate::utils;
 ///
 /// ## Example
 ///
-/// ```rust
+/// ```
 /// # use actix_web::{web, App, HttpRequest, HttpResponse, HttpServer};
 /// use actix_web_httpauth::headers::www_authenticate::bearer::{
 ///     Bearer, Error,
@@ -53,7 +53,7 @@ impl Bearer {
     ///
     /// ## Example
     ///
-    /// ```rust
+    /// ```
     /// # use actix_web_httpauth::headers::www_authenticate::bearer::{Bearer};
     /// let challenge = Bearer::build()
     ///     .realm("Restricted area")

@@ -21,7 +21,7 @@ use crate::headers::authorization::scheme::Scheme;
 ///
 /// # Example
 ///
-/// ```rust
+/// ```
 /// # use actix_web::http::header::Header;
 /// # use actix_web::{HttpRequest, Result};
 /// # use actix_web_httpauth::headers::authorization::{Authorization, Basic};

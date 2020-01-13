@@ -18,7 +18,7 @@ use crate::utils;
 ///
 /// ## Example
 ///
-/// ```rust
+/// ```
 /// # use actix_web::{web, App, HttpRequest, HttpResponse, HttpServer};
 /// use actix_web_httpauth::headers::www_authenticate::basic::Basic;
 /// use actix_web_httpauth::headers::www_authenticate::WwwAuthenticate;
@@ -44,7 +44,7 @@ impl Basic {
     ///
     /// ## Example
     ///
-    /// ```rust
+    /// ```
     /// # use actix_web_httpauth::headers::www_authenticate::basic::Basic;
     /// let challenge = Basic::new();
     /// ```
@@ -56,12 +56,12 @@ impl Basic {
     ///
     /// ## Examples
     ///
-    /// ```rust
+    /// ```
     /// # use actix_web_httpauth::headers::www_authenticate::basic::Basic;
     /// let challenge = Basic::with_realm("Restricted area");
     /// ```
     ///
-    /// ```rust
+    /// ```
     /// # use actix_web_httpauth::headers::www_authenticate::basic::Basic;
     /// let my_realm = "Earth realm".to_string();
     /// let challenge = Basic::with_realm(my_realm);
