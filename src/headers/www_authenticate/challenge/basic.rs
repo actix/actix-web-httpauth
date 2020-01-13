@@ -94,7 +94,7 @@ impl Challenge for Basic {
 }
 
 impl fmt::Display for Basic {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         let bytes = self.to_bytes();
         let repr = str::from_utf8(&bytes)
             // Should not happen since challenges are crafted manually

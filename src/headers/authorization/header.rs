@@ -98,7 +98,7 @@ impl<S: Scheme> IntoHeaderValue for Authorization<S> {
 }
 
 impl<S: Scheme> fmt::Display for Authorization<S> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Display::fmt(&self.0, f)
     }
 }
