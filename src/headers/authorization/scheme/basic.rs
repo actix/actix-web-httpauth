@@ -80,7 +80,10 @@ impl Scheme for Basic {
                 }
             })?;
 
-        Ok(Basic { user_id, password })
+        Ok(Basic {
+            user_id,
+            password,
+        })
     }
 }
 
