@@ -15,14 +15,14 @@ use crate::extractors::{basic, bearer, AuthExtractor};
 
 /// Middleware for checking HTTP authentication.
 ///
-/// If there is no `Authorization` header in the request,
-/// this middleware returns an error immediately,
-/// without calling the `F` callback.
+/// The 'F' callback is called with the request and
+/// the parsed credentials (or None if no `Authorization`
+/// header was passed in the request).
 ///
-/// Otherwise, it will pass both the request and
-/// the parsed credentials into it.
 /// In case of successful validation `F` callback
 /// is required to return the `ServiceRequest` back.
+/// If an error is returned, the middleware will abort
+/// request processing and return an error immediately.
 #[derive(Debug, Clone)]
 pub struct HttpAuthentication<T, F>
 where
@@ -35,7 +35,7 @@ where
 impl<T, F, O> HttpAuthentication<T, F>
 where
     T: AuthExtractor,
-    F: Fn(ServiceRequest, T) -> O,
+    F: Fn(ServiceRequest, Option<T>) -> O,
     O: Future<Output = Result<ServiceRequest, Error>>,
 {
     /// Construct `HttpAuthentication` middleware
@@ -51,7 +51,7 @@ where
 
 impl<F, O> HttpAuthentication<basic::BasicAuth, F>
 where
-    F: Fn(ServiceRequest, basic::BasicAuth) -> O,
+    F: Fn(ServiceRequest, Option<basic::BasicAuth>) -> O,
     O: Future<Output = Result<ServiceRequest, Error>>,
 {
     /// Construct `HttpAuthentication` middleware for the HTTP "Basic"
@@ -71,7 +71,7 @@ where
     /// // or to do something else in a async manner.
     /// async fn validator(
     ///     req: ServiceRequest,
-    ///     credentials: BasicAuth,
+    ///     credentials: Option<BasicAuth>,
     /// ) -> Result<ServiceRequest, Error> {
     ///     // All users are great and more than welcome!
     ///     Ok(req)
@@ -86,7 +86,7 @@ where
 
 impl<F, O> HttpAuthentication<bearer::BearerAuth, F>
 where
-    F: Fn(ServiceRequest, bearer::BearerAuth) -> O,
+    F: Fn(ServiceRequest, Option<bearer::BearerAuth>) -> O,
     O: Future<Output = Result<ServiceRequest, Error>>,
 {
     /// Construct `HttpAuthentication` middleware for the HTTP "Bearer"
@@ -100,8 +100,8 @@ where
     /// # use actix_web_httpauth::middleware::HttpAuthentication;
     /// # use actix_web_httpauth::extractors::bearer::{Config, BearerAuth};
     /// # use actix_web_httpauth::extractors::{AuthenticationError, AuthExtractorConfig};
-    /// async fn validator(req: ServiceRequest, credentials: BearerAuth) -> Result<ServiceRequest, Error> {
-    ///     if credentials.token() == "mF_9.B5f-4.1JqM" {
+    /// async fn validator(req: ServiceRequest, credentials: Option<BearerAuth>) -> Result<ServiceRequest, Error> {
+    ///     if credentials.unwrap().token() == "mF_9.B5f-4.1JqM" {
     ///         Ok(req)
     ///     } else {
     ///         let config = req.app_data::<Config>()
@@ -128,7 +128,7 @@ where
             Error = Error,
         > + 'static,
     S::Future: 'static,
-    F: Fn(ServiceRequest, T) -> O + 'static,
+    F: Fn(ServiceRequest, Option<T>) -> O + 'static,
     O: Future<Output = Result<ServiceRequest, Error>> + 'static,
     T: AuthExtractor + 'static,
 {
@@ -166,7 +166,7 @@ where
             Error = Error,
         > + 'static,
     S::Future: 'static,
-    F: Fn(ServiceRequest, T) -> O + 'static,
+    F: Fn(ServiceRequest, Option<T>) -> O + 'static,
     O: Future<Output = Result<ServiceRequest, Error>> + 'static,
     T: AuthExtractor + 'static,
 {
@@ -191,7 +191,7 @@ where
         let inner = self.service.clone();
 
         async move {
-            let (req, credentials) = Extract::<T>::new(req).await?;
+            let credentials = Extract::<T>::new(&req).await.ok();
             let req = process_fn(req, credentials).await?;
             let mut service = inner.lock().await;
             service.call(req).await
@@ -200,14 +200,14 @@ where
     }
 }
 
-struct Extract<T> {
-    req: Option<ServiceRequest>,
+struct Extract<'a, T> {
+    req: Option<&'a ServiceRequest>,
     f: Option<LocalBoxFuture<'static, Result<T, Error>>>,
     _extractor: PhantomData<fn() -> T>,
 }
 
-impl<T> Extract<T> {
-    pub fn new(req: ServiceRequest) -> Self {
+impl<'a, T> Extract<'a, T> {
+    pub fn new(req: &'a ServiceRequest) -> Self {
         Extract {
             req: Some(req),
             f: None,
@@ -216,13 +216,13 @@ impl<T> Extract<T> {
     }
 }
 
-impl<T> Future for Extract<T>
+impl<T> Future for Extract<'_, T>
 where
     T: AuthExtractor,
     T::Future: 'static,
     T::Error: 'static,
 {
-    type Output = Result<(ServiceRequest, T), Error>;
+    type Output = Result<T, Error>;
 
     fn poll(
         mut self: Pin<&mut Self>,
@@ -241,7 +241,7 @@ where
             .expect("Extraction future should be initialized at this point");
         let credentials = futures::ready!(Future::poll(f.as_mut(), ctx))?;
 
-        let req = self.req.take().expect("Extract future was polled twice!");
-        Poll::Ready(Ok((req, credentials)))
+        let _req = self.req.take().expect("Extract future was polled twice!");
+        Poll::Ready(Ok(credentials))
     }
 }
