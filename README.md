@@ -8,6 +8,8 @@
 
 HTTP authentication schemes for [actix-web](https://github.com/actix/actix-web) framework.
 
+**NOTICE: This repository has been archived. Please visit https://github.com/actix/actix-extras instead.**
+
 Provides:
  * typed [Authorization] and  [WWW-Authenticate] headers
  * [extractors] for an [Authorization] header
